@@ -2,7 +2,19 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/Users.js";
+import { ContentModel } from "../models/Content.Model.js";
+import { userMiddleware } from "../middlewares/auth.middleware.js";
 
+// Extend Express Request interface to include userId
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}
+
+// Signup Route
 export const signup = async (req: express.Request, res: express.Response) => {
   try {
     const { username, email, password } = req.body;
@@ -36,6 +48,7 @@ export const signup = async (req: express.Request, res: express.Response) => {
   }
 };
 
+// Signin Route
 export const signin = async (req: express.Request, res: express.Response) => {
   try {
     const { username, email, password } = req.body;
@@ -72,3 +85,73 @@ export const signin = async (req: express.Request, res: express.Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Add Content Route
+export const addContent = async (
+  req: express.Request & { userId?: string }, // extend type to include userId
+  res: express.Response
+) => {
+  try {
+    const { link, type, title } = req.body;
+
+    const userId = req.userId;
+
+    const newContent = await ContentModel.create({
+      type,
+      link,
+      title,
+      tags: [],
+      userId: userId, // comes fron user Middleware
+    });
+
+    res.json({
+      message: "Content Added!",
+    });
+  } catch (error) {
+    console.error("Error adding content:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get user's Content Route
+export const showContent = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const userId = req.userId;
+    const content = await ContentModel.find({
+      userId: userId,
+    }).populate("userId", "username");
+
+    res.json({
+      content,
+    });
+  } catch (error) {
+    res.json({
+      message: "Something went Wrong!",
+    });
+  }
+};
+
+//Delete Content Route
+export const deleteContent = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  try {
+    const userId = req.userId;
+  } catch (error) {}
+};
+
+// Share Brain Route
+export const brainShare = async (
+  req: express.Request,
+  res: express.Response
+) => {};
+
+// Share Link
+export const shareLink = async (
+  req: express.Request,
+  res: express.Response
+) => {};

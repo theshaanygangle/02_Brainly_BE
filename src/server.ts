@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import { connectDB } from "./config/db.js";
 import authRouter from "./routes/auth.routes.js";
 import contentRouter from "./routes/content.routes.js";
@@ -9,6 +10,7 @@ const app = express();
 
 //Middleware
 app.use(express.json()); // Middleware use Karne ke liye
+app.use(bodyParser.json());
 
 //Routes
 app.use("/api/v1", authRouter);

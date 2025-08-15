@@ -25,20 +25,24 @@ export const authMiddleware = (
 };
 
 export const userMiddleware = (
-  req: AuthRequest,
+  req: Request & { userId?: string },
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.headers.authorization?.split(" ")[1]; // space split
-  if (!token) {
-    return res.status(401).json({ message: "Token Not Found!" });
-  }
-
   try {
-    const decoded = jwt.verify(token as string, process.env.JWT_SECRET!);
-    req.user = decoded;
-    next();
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Token Not Found!" });
+    }
+
+    const decoded = jwt.verify(token as string, process.env.JWT_SECRET!) as {
+      id: string;
+    };
+    if (decoded) {
+      req.userId = decoded.id; // ✅ Attach the userId to the request
+      next();
+    }
   } catch (error) {
-    res.status(401).json({ message: "User Not Logged In!" });
+    res.status(401).json({ message: "Unauthorized User!" });
   }
 };

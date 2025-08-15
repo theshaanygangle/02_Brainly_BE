@@ -1,10 +1,12 @@
-import mongoose, { Document, model, Schema } from "mongoose";
+import mongoose, { Document, model, Schema, Types } from "mongoose";
 
 export interface IContent extends Document {
   type: "document" | "tweet" | "youtube" | "link";
   link: string;
   title: string;
   tags: string[];
+  userId: Types.ObjectId;
+  //author: string;
 }
 
 const ContentSchema = new Schema<IContent>(
@@ -16,7 +18,9 @@ const ContentSchema = new Schema<IContent>(
     },
     link: { type: String, required: true },
     title: { type: String, required: true },
-    tags: { type: [String], default: [] },
+    tags: { type: [String], required: true, default: [] },
+    userId: { type: Schema.Types.ObjectId, required: true },
+    //author: { type: String },
   },
   { timestamps: true }
 );
