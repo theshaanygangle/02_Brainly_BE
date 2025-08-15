@@ -140,8 +140,18 @@ export const deleteContent = async (
   res: express.Response
 ) => {
   try {
-    const userId = req.userId;
-  } catch (error) {}
+    const contentId = req.body.contentId;
+
+    await ContentModel.deleteMany({
+      contentId,
+      userId: req.userId,
+    });
+    res.json({
+      message: "Deleted!",
+    });
+  } catch (error) {
+    res.json({ message: "Opps! Something went wrong while deleting!" });
+  }
 };
 
 // Share Brain Route

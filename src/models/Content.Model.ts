@@ -1,15 +1,17 @@
 import mongoose, { Document, model, Schema, Types } from "mongoose";
 
-export interface IContent extends Document {
-  type: "document" | "tweet" | "youtube" | "link";
-  link: string;
-  title: string;
-  tags: string[];
-  userId: Types.ObjectId;
-  //author: string;
-}
+// export interface IContent extends Document {
+//   type: "document" | "tweet" | "youtube" | "link";
+//   link: string;
+//   title: string;
+//   tags: string[];
+//   userId: Types.ObjectId;
+//   //author: string;
+// }
 
-const ContentSchema = new Schema<IContent>(
+//<IContent>
+
+const ContentSchema = new Schema(
   {
     type: {
       type: String,
@@ -19,10 +21,10 @@ const ContentSchema = new Schema<IContent>(
     link: { type: String, required: true },
     title: { type: String, required: true },
     tags: { type: [String], required: true, default: [] },
-    userId: { type: Schema.Types.ObjectId, required: true },
+    userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     //author: { type: String },
   },
   { timestamps: true }
 );
 
-export const ContentModel = model<IContent>("Content", ContentSchema);
+export const ContentModel = model("Content", ContentSchema);
