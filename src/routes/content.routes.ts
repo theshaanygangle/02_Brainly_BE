@@ -15,6 +15,6 @@ contentRouter.post("/content", userMiddleware, addContent);
 contentRouter.get("/content", userMiddleware, showContent);
 contentRouter.delete("/content", userMiddleware, deleteContent);
 contentRouter.post("/brain/share", userMiddleware, brainShare);
-contentRouter.get("/brain/:sharelink", userMiddleware, shareLink);
+contentRouter.get("/brain/:shareLink", shareLink);
 
 export default contentRouter;

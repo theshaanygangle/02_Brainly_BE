@@ -1,9 +1,9 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserModel } from "../models/Users.js";
+import { LinkModel, UserModel } from "../models/Users.js";
 import { ContentModel } from "../models/Content.Model.js";
-import { userMiddleware } from "../middlewares/auth.middleware.js";
+import { random } from "../utils.js";
 
 // Extend Express Request interface to include userId
 declare global {
@@ -158,10 +158,79 @@ export const deleteContent = async (
 export const brainShare = async (
   req: express.Request,
   res: express.Response
-) => {};
+) => {
+  try {
+    const share = req.body.share;
+
+    if (share) {
+      // Check if link already exists
+      const existingLink = await LinkModel.findOne({
+        userId: req.userId,
+      });
+
+      if (existingLink) {
+        res.json({
+          hash: existingLink.hash,
+        });
+      }
+
+      // Create A New Hash
+      await LinkModel.create({
+        userId: req.userId,
+        hash: random(10),
+      });
+      const hashCreated = await LinkModel.findOne({ userId: req.userId });
+      return res.status(200).json({
+        hash: hashCreated?.hash,
+      });
+    } // Else deleting the existing hash
+    else {
+      await LinkModel.deleteOne({ userId: req.userId });
+    }
+    return res.json({
+      message: "Upadated Link for Brain Share!",
+    });
+  } catch (error) {
+    return res.json({ error });
+  }
+};
 
 // Share Link
 export const shareLink = async (
   req: express.Request,
   res: express.Response
-) => {};
+) => {
+  const hash = req.params.shareLink;
+
+  // console.log("req.params:", req.params);
+  // console.log("Searching hash:", hash);
+
+  // Find the link using the provided hash.
+  const link = await LinkModel.findOne({ hash });
+
+  // console.log("Found link:", link);
+
+  if (!link) {
+    return res.status(411).json({ message: "Sorry! Link Nahi hai!" });
+  }
+
+  // Fetch content and user details for the shareable link.
+  const content = await ContentModel.find({
+    userId: link?.userId,
+  });
+
+  const user = await UserModel.find({
+    _id: link?.userId,
+  });
+
+  if (!user || user.length === 0) {
+    return res.status(404).json({
+      message: "User Not Found",
+    });
+  }
+
+  res.json({
+    username: user[0]?.username,
+    content: content,
+  });
+};
